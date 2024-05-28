@@ -143,7 +143,6 @@ export function solve(components: placed[]): solution | null {
     for (let i = 0; i < C; i++) {
         diodes.push(1);
     }
-    let opened = 0;
 
     const max_iterations = 10;
     for (let iter = 0; iter < max_iterations; iter++) {
@@ -163,17 +162,17 @@ export function solve(components: placed[]): solution | null {
         }
         const voltages = [0, ...x.slice(C)];
 
+        let opened = 0; // how many open diodes were found in this iteration
         for (let c = 0; c < components.length; c++) {
             const cp = components[c];
             const cc = cp.c;
             // TODO do we need to handle diodes that we thought were open circuits in last iteration?
             if (cc.type === "diode" && diodes[c] && voltages[cp.p] - voltages[cp.q] < cc.Vd) {
-                opened++;
-                A.splice(c, 1)
-                N--;
-                for (let i = 0; i < N; i++) {
-                    A[i].splice(c, 1);
+                A.splice(c - opened, 1)
+                for (let i = 0; i < A.length; i++) {
+                    A[i].splice(c - opened, 1);
                 }
+                opened++;
             }
         }
 
