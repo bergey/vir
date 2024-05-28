@@ -102,8 +102,9 @@ function iterate_diodes_conducting(components: placed[], A: number[][], b: numbe
 
     const max_iterations = 10;
     for (let iter = 0; iter < max_iterations; iter++) {
-        const permutations = factor_plu(A);
-        const x = lup_solve(A, permutations, b);
+        const B = structuredClone(A); // preserve A for next iteration
+        const permutations = factor_plu(B);
+        const x = lup_solve(B, permutations, b);
 
         // current from solver or 0 if diode is not conducting
         const currents: number[] = [];
@@ -145,7 +146,7 @@ function iterate_diodes_conducting(components: placed[], A: number[][], b: numbe
 // Node 0 should be ground; the solution voltages are expressed relative to this node
 // The solution currents are in the same order as the specified components
 export function solve(components: placed[]): solution | null {
-    let C = components.length;
+    const C = components.length;
     // find highest-numbered node
     let N = 0;
     for (const c of components) {
@@ -153,10 +154,10 @@ export function solve(components: placed[]): solution | null {
     }
 
     // square matrix, all zeros, one row (equation) per component, 1 per node except node 0
-    let A: number[][] = [];
-    let b: number[] = [];
+    const A: number[][] = [];
+    const b: number[] = [];
     for (let i = 0; i < N + C - 1; i++) {
-        let row: number[] = [];
+        const row: number[] = [];
         for (let j = 0; j < N; j++) {
             row.push(0);
         }
