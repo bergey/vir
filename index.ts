@@ -22,6 +22,11 @@ export type placed = {
     q: node;
 }
 
+export type solution = {
+    voltages: number[];
+    currents: number[];
+}
+
 // A should be a matrix with N rows (first index) and N columns (second index)
 // A is modified in place to contain both L & U
 // the permutation array is returend
@@ -86,4 +91,58 @@ function lup_solve(A: number[][], permutations: number[], b: number[]): number[]
     }
 
     return x;
+}
+
+// Node 0 should be ground; the solution voltages are expressed relative to this node
+// The solution currents are in the same order as the specified components
+export function solve(components: placed[]): solution {
+    let C = components.length;
+    // find highest-numbered node
+    let N = 0;
+    for (const c of components) {
+        N = Math.max(N, c.p, c.q);
+    }
+
+    // square matrix, all zeros, one row (equation) per component, 1 per node except node 0
+    let A: number[][] = [];
+    let b: number[] = [];
+    for (let i = 0; i < N + C - 1; i++) {
+        let row: number[] = [];
+        for (let j = 0; j < N; j++) {
+            row.push(0);
+        }
+        A.push(row);
+        b.push(0);
+    }
+
+
+    for (let c = 0; c < C; c++) {
+        const p = components[c].p;
+        if (p !== 0) {
+            A[c][C + p - 1] = -1;
+            A[C + p - 1][c] = -1;
+        }
+        const q = components[c].q;
+        if (q !== 0) {
+            A[c][C + q - 1] = 1;
+            A[C + q - 1][c] = 1;
+        }
+
+        const cc = components[c].c;
+        if (cc.type == "resistor") {
+            A[c][c] = cc.R;
+        } else if (cc.type == "voltage") {
+            b[c] = cc.V;
+        } else if (cc.type == "diode") {
+            b[c] = cc.Vd;
+        }
+    }
+
+    // TODO clone, loop until diode bias converges
+    const permutations = factor_plu(A);
+    const x = lup_solve(A, permutations, b);
+    return {
+        currents: x.slice(0, C),
+        voltages: [0, ...x.slice(C)],
+    }
 }
