@@ -93,6 +93,55 @@ function lup_solve(A: number[][], permutations: number[], b: number[]): number[]
     return x;
 }
 
+function iterate_diodes_conducting(components: placed[], A: number[][], b: number[]): solution | null {
+    // start by assuming all diodes are conducting
+    const diodes: number[] = [];
+    for (let i = 0; i < components.length; i++) {
+        diodes.push(1);
+    }
+
+    const max_iterations = 10;
+    for (let iter = 0; iter < max_iterations; iter++) {
+        const permutations = factor_plu(A);
+        const x = lup_solve(A, permutations, b);
+
+        // current from solver or 0 if diode is not conducting
+        const currents: number[] = [];
+        let c = 0;
+        for (let d = 0; d < diodes.length; d++) {
+            if (diodes[d]) {
+                currents.push(x[c]);
+                c++;
+            } else {
+                currents.push(0);
+            }
+        }
+        const voltages = [0, ...x.slice(c)];
+
+        let opened = 0; // how many open diodes were found in this iteration
+        for (let c = 0; c < components.length; c++) {
+            const cp = components[c];
+            const cc = cp.c;
+            // TODO do we need to handle diodes that we thought were open circuits in last iteration?
+            if (cc.type === "diode" && diodes[c] && voltages[cp.p] - voltages[cp.q] < cc.Vd) {
+                // row / column in A, accounting for already-deleted columns
+                const to_delete = diodes.slice(0, c + 1).reduce((sum, d) => sum + d, 0);
+                A.splice(to_delete, 1)
+                for (let i = 0; i < A.length; i++) {
+                    A[i].splice(to_delete, 1);
+                }
+                diodes[c] = 0;
+                opened++;
+            }
+        }
+
+        if (opened === 0) {
+            return { currents, voltages };
+        }
+    }
+    return null;
+}
+
 // Node 0 should be ground; the solution voltages are expressed relative to this node
 // The solution currents are in the same order as the specified components
 export function solve(components: placed[]): solution | null {
@@ -138,47 +187,5 @@ export function solve(components: placed[]): solution | null {
         }
     }
 
-    // start by assuming all diodes are conducting
-    const diodes: number[] = [];
-    for (let i = 0; i < C; i++) {
-        diodes.push(1);
-    }
-
-    const max_iterations = 10;
-    for (let iter = 0; iter < max_iterations; iter++) {
-        const permutations = factor_plu(A);
-        const x = lup_solve(A, permutations, b);
-
-        // current from solver or 0 if diode is not conducting
-        const currents: number[] = [];
-        let c = 0;
-        for (let d = 0; d < diodes.length; d++) {
-            if (diodes[d]) {
-                currents.push(x[c]);
-                c++;
-            } else {
-                currents.push(0);
-            }
-        }
-        const voltages = [0, ...x.slice(C)];
-
-        let opened = 0; // how many open diodes were found in this iteration
-        for (let c = 0; c < components.length; c++) {
-            const cp = components[c];
-            const cc = cp.c;
-            // TODO do we need to handle diodes that we thought were open circuits in last iteration?
-            if (cc.type === "diode" && diodes[c] && voltages[cp.p] - voltages[cp.q] < cc.Vd) {
-                A.splice(c - opened, 1)
-                for (let i = 0; i < A.length; i++) {
-                    A[i].splice(c - opened, 1);
-                }
-                opened++;
-            }
-        }
-
-        if (opened === 0) {
-            return { currents, voltages };
-        }
-    }
-    return null;
+    return iterate_diodes_conducting(components, A, b);
 }
