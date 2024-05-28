@@ -1,0 +1,12 @@
+{
+  "name": "vir",
+  "version": "1.0.0",
+  "description": "solve circuit equations with resistors & diodes",
+  "main": "index.ts",
+  "repository": "github.com/bergey/vir",
+  "author": "Daniel Bergey",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.4.5"
+  }
+}
