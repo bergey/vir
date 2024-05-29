@@ -29,8 +29,8 @@ export type solution = {
 
 // A should be a matrix with N rows (first index) and N columns (second index)
 // A is modified in place to contain both L & U
-// the permutation array is returend
-function factor_plu(A: number[][]): number[] {
+// the permutation array is returned
+export function factor_plu(A: number[][]): number[] {
   const N = A.length;
 
   const permutations: number[] = [];
@@ -42,14 +42,14 @@ function factor_plu(A: number[][]): number[] {
     // pick pivot for row k
     let p = 0;
     let k_swap = k;
-    for (let i = k; k < N; i++) {
+    for (let i = k; i < N; i++) {
       if (Math.abs(A[i][k]) > p) {
         p = Math.abs(A[i][k]);
         k_swap = i;
       }
-      if (p == 0) {
-        throw "singular matrix";
-      }
+    }
+    if (p == 0) {
+      throw "singular matrix";
     }
     p = permutations[k];
     permutations[k] = permutations[k_swap];
@@ -57,7 +57,12 @@ function factor_plu(A: number[][]): number[] {
 
     // elimination
     for (let i = 0; i < N; i++) {
-      // multiplier for each row
+      let a = A[k][i];
+      A[k][i] = A[k_swap][i];
+      A[k_swap][i] = a;
+    }
+
+    for (let i = k + 1; i < N; i++) {
       A[i][k] = A[i][k] / A[k][k];
       for (let j = k + 1; j < N; j++) {
         A[i][j] = A[i][j] - A[i][k] * A[k][j]
@@ -68,7 +73,7 @@ function factor_plu(A: number[][]): number[] {
   return permutations;
 }
 
-// A should be an NxN matrix with U & L as returned by factol_plu
+// A should be an NxN matrix with U & L as returned by factor_plu
 // permutations & b should each have length N
 function lup_solve(A: number[][], permutations: number[], b: number[]): number[] {
   const N = A.length;
@@ -167,19 +172,18 @@ export function solve(components: placed[]): solution | null {
 
 
   for (let c = 0; c < C; c++) {
-    console.log(components[c]);
     const p = components[c].p;
     if (p !== 0) {
       A[c][C + p - 1] = -1;
       A[C + p - 1][c] = -1;
     }
-    console.log(A);
+
     const q = components[c].q;
     if (q !== 0) {
       A[c][C + q - 1] = 1;
       A[C + q - 1][c] = 1;
     }
-    console.log(A);
+
     const cc = components[c].c;
     if (cc.type == "resistor") {
       A[c][c] = cc.R;
