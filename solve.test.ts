@@ -1,4 +1,4 @@
-import {factor_plu, solve, placed} from './solve';
+import {solve, placed} from './solve';
 
 
 const V = ({v = 3, p, q}): placed => {
@@ -35,7 +35,7 @@ const D = ({vd = 1.2, p, q}): placed => {
 }
 
 const singleResistor: placed[] = [
-  V({v: 3, p: 0, q: 1}),
+  V({p: 0, q: 1}),
   R({p: 1, q: 0})
 ]
 test('checks singleResistor', () => {
@@ -43,7 +43,7 @@ test('checks singleResistor', () => {
 })
 
 const seriesResistor: placed[] = [
-  V({v: 3, p: 0, q: 1}),
+  V({p: 0, q: 1}),
   R({p: 1, q: 2}),
   R({p: 2, q: 0})
 ]
@@ -52,7 +52,7 @@ test('checks seriesResistor', () => {
 })
 
 const voltageDivider: placed[] = [
-  V({v: 3, p: 0, q: 1}),
+  V({p: 0, q: 1}),
   R({r: 100, p: 1, q: 2}),
   R({r: 200, p: 2, q: 0})
 ]
@@ -61,7 +61,7 @@ test('checks voltageDivider', () => {
 })
 
 const seriesDiode: placed[] = [
-  V({v: 3, p: 0, q: 1}),
+  V({p: 0, q: 1}),
   R({p: 1, q: 2}),
   D({p: 2, q: 0})
 ]
