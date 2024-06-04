@@ -55,13 +55,13 @@ export function factor_plu(A: number[][]): number[] {
     permutations[k] = permutations[k_swap];
     permutations[k_swap] = p;
 
-    // elimination
     for (let i = 0; i < N; i++) {
-      let a = A[k][i];
+      const a = A[k][i];
       A[k][i] = A[k_swap][i];
       A[k_swap][i] = a;
     }
 
+    // elimination
     for (let i = k + 1; i < N; i++) {
       A[i][k] = A[i][k] / A[k][k];
       for (let j = k + 1; j < N; j++) {
