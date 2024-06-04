@@ -1,4 +1,4 @@
-import {solve, placed} from './solve';
+import {solve, placed} from './index';
 
 
 const V = ({v = 3, p, q}): placed => {
