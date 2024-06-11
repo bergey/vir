@@ -39,7 +39,7 @@ const singleResistor: placed[] = [
   R({p: 1, q: 0})
 ]
 test('checks singleResistor', () => {
-  expect(solve(singleResistor)).toEqual([])
+  expect(solve(singleResistor)).toEqual({"currents": [undefined, 0.013636363636363636], "voltages": [0, 3]})
 })
 
 const seriesResistor: placed[] = [
@@ -48,7 +48,10 @@ const seriesResistor: placed[] = [
   R({p: 2, q: 0})
 ]
 test('checks seriesResistor', () => {
-  expect(solve(seriesResistor)).toEqual([])
+  expect(solve(seriesResistor)).toEqual({
+    "currents": [undefined, 0.006818181818181818, 0.006818181818181818],
+    "voltages": [0, 3, 1.5]
+  })
 })
 
 const voltageDivider: placed[] = [
@@ -57,7 +60,10 @@ const voltageDivider: placed[] = [
   R({r: 200, p: 2, q: 0})
 ]
 test('checks voltageDivider', () => {
-  expect(solve(voltageDivider)).toEqual([])
+  expect(solve(voltageDivider)).toEqual({
+    "currents": [undefined, 0.01, 0.01],
+    "voltages": [0, 3, 2]
+  })
 })
 
 const seriesDiode: placed[] = [
@@ -66,5 +72,8 @@ const seriesDiode: placed[] = [
   D({p: 2, q: 0})
 ]
 test('checks seriesDiode', () => {
-  expect(solve(seriesDiode)).toEqual([])
+  expect(solve(seriesDiode)).toEqual({
+    "currents": [undefined, 0.00818181818181818, 0.00818181818181818],
+    "voltages": [0, 3, 1.2]
+  })
 })
