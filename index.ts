@@ -69,7 +69,7 @@ export function factor_plu(A: number[][]): number[] {
       }
     }
   }
-
+  console.log(permutations, A);
   return permutations;
 }
 
